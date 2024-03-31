@@ -2,7 +2,8 @@
   "manifest_version": 3,
   "name": "115 Cookie",
   "version": "1.1",
-  "description": "管理115的cookie",
+  "description": "Manage cookies for the 115.com",
+  "default_locale": "en_US",
   "permissions": ["cookies", "storage"],
   "host_permissions": [
     "https://115.com/*"
