@@ -1,34 +1,32 @@
 // popup.js
 // 使用模板初始化 Cookie 内容
 const defaultCookies = [
-    // ...
+  // ...
 ];
 
 // 从同步存储读取cookieData
 chrome.storage.sync.get(['cookieData'], function(result) {
-  // 如果有保存的cookieData，就使用这些数据，否则使用默认的数据
-  let cookies = result.cookieData || defaultCookies;
-  document.getElementById('cookieInput').value = JSON.stringify(cookies, null, 2);
+// 如果有保存的cookieData，就使用这些数据，否则使用默认的数据
+let cookies = result.cookieData || defaultCookies;
+document.getElementById('cookieInput').value = JSON.stringify(cookies, null, 2);
 });
 
 // 设置 Cookie
 document.getElementById('setCookies').addEventListener('click', function() {
-  let cookieInput = document.getElementById('cookieInput').value;
-  let cookies = JSON.parse(cookieInput);
+let cookieInput = document.getElementById('cookieInput').value;
+let cookies = JSON.parse(cookieInput);
 
-  chrome.runtime.sendMessage({action: 'setCookies', cookies: cookies}, function(response) {
-    console.log('Cookies set');
-    // 保存新的cookie值到同步存储
-    chrome.storage.sync.set({cookieData: cookies}, function() {
-      console.log('New cookieData saved');
-      // 等待3秒后刷新当前标签页
-      setTimeout(function() {
-        chrome.tabs.reload();
-        // 关闭popup窗口
-        window.close();
-      }, 3000);
-    });
+chrome.runtime.sendMessage({action: 'setCookies', cookies: cookies}, function(response) {
+  console.log('Cookies set');
+  // 保存新的cookie值到同步存储
+  chrome.storage.sync.set({cookieData: cookies}, function() {
+    console.log('New cookieData saved');
+    // 在当前标签页打开115.com
+    chrome.tabs.update({url: 'https://115.com'});
+    // 关闭插件的窗口
+    window.close();
   });
+});
 });
 
 // 编辑 Cookie
