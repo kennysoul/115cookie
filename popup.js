@@ -24,11 +24,13 @@ document.getElementById('setCookies').addEventListener('click', function() {
       // 在当前标签页打开115.com
       chrome.tabs.update({url: 'https://115.com'}, function() {
         // 等待2秒后再导入cookie
-        setTimeout(function() {
-          chrome.runtime.sendMessage({action: 'setCookies', cookies: cookies}, function(response) {
-            console.log('Cookies imported after 2 seconds');
-          });
-        }, 2000); // 2000 milliseconds = 2 seconds
+setTimeout(function() {
+  chrome.runtime.sendMessage({action: 'setCookies', cookies: cookies}, function(response) {
+    console.log('Cookies imported after 2 seconds');
+    // 导入cookie后刷新页面
+    chrome.tabs.reload();
+  });
+}, 2000); // 2000 milliseconds = 2 seconds
         // 关闭插件的窗口
         window.close();
       });
