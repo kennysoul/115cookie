@@ -13,21 +13,29 @@ document.getElementById('cookieInput').value = JSON.stringify(cookies, null, 2);
 
 // 设置 Cookie
 document.getElementById('setCookies').addEventListener('click', function() {
-let cookieInput = document.getElementById('cookieInput').value;
-let cookies = JSON.parse(cookieInput);
+  let cookieInput = document.getElementById('cookieInput').value;
+  let cookies = JSON.parse(cookieInput);
 
-chrome.runtime.sendMessage({action: 'setCookies', cookies: cookies}, function(response) {
-  console.log('Cookies set');
-  // 保存新的cookie值到同步存储
-  chrome.storage.sync.set({cookieData: cookies}, function() {
-    console.log('New cookieData saved');
-    // 在当前标签页打开115.com
-    chrome.tabs.update({url: 'https://115.com'});
-    // 关闭插件的窗口
-    window.close();
+  chrome.runtime.sendMessage({action: 'setCookies', cookies: cookies}, function(response) {
+    console.log('Cookies set');
+    // 保存新的cookie值到同步存储
+    chrome.storage.sync.set({cookieData: cookies}, function() {
+      console.log('New cookieData saved');
+      // 在当前标签页打开115.com
+      chrome.tabs.update({url: 'https://115.com'}, function() {
+        // 等待2秒后再导入cookie
+        setTimeout(function() {
+          chrome.runtime.sendMessage({action: 'setCookies', cookies: cookies}, function(response) {
+            console.log('Cookies imported after 2 seconds');
+          });
+        }, 2000); // 2000 milliseconds = 2 seconds
+        // 关闭插件的窗口
+        window.close();
+      });
+    });
   });
 });
-});
+
 
 // 编辑 Cookie
 document.getElementById('editCookies').addEventListener('click', function() {
