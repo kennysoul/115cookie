@@ -22,21 +22,28 @@ document.getElementById('setCookies').addEventListener('click', function() {
     chrome.storage.sync.set({cookieData: cookies}, function() {
       console.log('New cookieData saved');
       // 在当前标签页打开115.com
-      chrome.tabs.update({url: 'https://115.com'}, function() {
-        // 等待2秒后再导入cookie
-setTimeout(function() {
-  chrome.runtime.sendMessage({action: 'setCookies', cookies: cookies}, function(response) {
-    console.log('Cookies imported after 2 seconds');
-    // 导入cookie后刷新页面
-    chrome.tabs.reload();
-  });
-}, 2000); // 2000 milliseconds = 2 seconds
-        // 关闭插件的窗口
-        window.close();
+      chrome.tabs.update({url: 'https://115.com'}, function(tab) {
+        // 监听标签页更新事件
+        chrome.tabs.onUpdated.addListener(function listener (tabId, info) {
+          if (info.status === 'complete' && tabId === tab.id) {
+            // 当标签页加载完成后，移除监听器，设置cookie并刷新页面
+            chrome.tabs.onUpdated.removeListener(listener);
+            chrome.runtime.sendMessage({action: 'setCookies', cookies: cookies}, function(response) {
+              console.log('Cookies imported');
+              // 导入cookie后刷新页面
+              chrome.tabs.reload(tabId, function() {
+                // 关闭插件的窗口
+                window.close();
+              });
+            });
+          }
+        });
       });
     });
   });
 });
+
+
 
 
 // 编辑 Cookie
