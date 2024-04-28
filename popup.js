@@ -1,14 +1,13 @@
 // popup.js
 // 使用模板初始化 Cookie 内容
 const defaultCookies = [
-  // ...
+  // 初始化默认的Cookie模板
 ];
 
 // 从同步存储读取cookieData
 chrome.storage.sync.get(['cookieData'], function(result) {
-// 如果有保存的cookieData，就使用这些数据，否则使用默认的数据
-let cookies = result.cookieData || defaultCookies;
-document.getElementById('cookieInput').value = JSON.stringify(cookies, null, 2);
+  let cookies = result.cookieData || defaultCookies;
+  document.getElementById('cookieInput').value = JSON.stringify(cookies, null, 2);
 });
 
 // 设置 Cookie
@@ -17,43 +16,22 @@ document.getElementById('setCookies').addEventListener('click', function() {
   let cookies = JSON.parse(cookieInput);
 
   chrome.runtime.sendMessage({action: 'setCookies', cookies: cookies}, function(response) {
-    console.log('Cookies set');
-    // 保存新的cookie值到同步存储
-    chrome.storage.sync.set({cookieData: cookies}, function() {
-      console.log('New cookieData saved');
-      // 在当前标签页打开115.com
-      chrome.tabs.update({url: 'https://115.com'}, function(tab) {
-        // 监听标签页更新事件
-        chrome.tabs.onUpdated.addListener(function listener (tabId, info) {
-          if (info.status === 'complete' && tabId === tab.id) {
-            // 当标签页加载完成后，移除监听器，设置cookie并刷新页面
-            chrome.tabs.onUpdated.removeListener(listener);
-            chrome.runtime.sendMessage({action: 'setCookies', cookies: cookies}, function(response) {
-              console.log('Cookies imported');
-              // 导入cookie后刷新页面
-              chrome.tabs.reload(tabId, function() {
-                // 关闭插件的窗口
-                window.close();
-              });
-            });
-          }
-        });
+    if (response.result === 'success') {
+      console.log('Cookies successfully set');
+      chrome.tabs.update({url: 'https://115.com', active: true}, function(tab) {
+        window.close(); // 关闭插件的窗口
       });
-    });
+    } else {
+      console.error('Failed to set cookies:', response.message);
+    }
   });
 });
 
-
-
-
 // 编辑 Cookie
 document.getElementById('editCookies').addEventListener('click', function() {
-  // 获取文本区域的内容
   let cookieInput = document.getElementById('cookieInput').value;
-  // 将编辑后的cookie值保存到cookieData变量中
   chrome.runtime.sendMessage({action: 'setCookies', cookies: JSON.parse(cookieInput)}, function(response) {
     console.log('Cookies updated');
-    // 保存新的cookie值到同步存储
     chrome.storage.sync.set({cookieData: JSON.parse(cookieInput)}, function() {
       console.log('New cookieData saved');
     });
@@ -64,7 +42,6 @@ document.getElementById('editCookies').addEventListener('click', function() {
 document.getElementById('exportCookies').addEventListener('click', function() {
   chrome.storage.sync.get(['cookieData'], function(result) {
     let cookies = result.cookieData || defaultCookies;
-    // 创建一个隐藏的下载链接
     let a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(cookies, null, 2)], {type: 'application/json'}));
     a.download = 'cookies.json';
@@ -87,10 +64,8 @@ document.getElementById('importCookies').addEventListener('click', function() {
       let cookies = JSON.parse(event.target.result);
       chrome.runtime.sendMessage({action: 'setCookies', cookies: cookies}, function(response) {
         console.log('Cookies imported');
-        // 保存新的cookie值到同步存储
         chrome.storage.sync.set({cookieData: cookies}, function() {
           console.log('New cookieData saved');
-          // 更新文本区域的内容
           document.getElementById('cookieInput').value = JSON.stringify(cookies, null, 2);
         });
       });
