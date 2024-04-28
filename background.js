@@ -1,17 +1,15 @@
+// background.js
 let cookieData = null;
 
 // 监听来自popup的消息
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'setCookies') {
     cookieData = request.cookies;
-    // 清除现有cookie
     chrome.cookies.getAll({domain: '115.com'}, function(cookies) {
-      for (let cookie of cookies) {
-        chrome.cookies.remove({url: 'https://115.com', name: cookie.name});
-      }
-      // 设置新cookie
-      for (let cookie of cookieData) {
-        chrome.cookies.set({
+      let promiseArray = cookies.map(cookie => chrome.cookies.remove({url: 'https://115.com', name: cookie.name}));
+
+      Promise.all(promiseArray).then(() => {
+        let setPromiseArray = cookieData.map(cookie => chrome.cookies.set({
           url: 'https://115.com',
           name: cookie.name,
           value: cookie.value,
@@ -20,26 +18,31 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           secure: cookie.secure,
           httpOnly: cookie.httpOnly,
           expirationDate: cookie.expirationDate
+        }));
+
+        Promise.all(setPromiseArray).then(() => {
+          sendResponse({result: 'success'});
+        }).catch(error => {
+          console.error('Error setting cookies:', error);
+          sendResponse({result: 'error', message: error});
         });
-      }
+      }).catch(error => {
+        console.error('Error removing old cookies:', error);
+        sendResponse({result: 'error', message: error});
+      });
     });
-    sendResponse({result: 'success'});
-  } else if (request.action === 'getCookies') {
-    sendResponse({cookies: cookieData});
+    return true; // 确保异步sendResponse有效
   }
-  return true; // 确保异步sendResponse有效
 });
 
-// 自动设置cookie
+// 自动设置cookie的逻辑也可以进行相应的错误处理和优化
 chrome.cookies.onChanged.addListener(function(changeInfo) {
   if (changeInfo.cause === 'explicit' && changeInfo.cookie.domain.endsWith('115.com') && cookieData) {
-    // 获取所有已保存的cookie
     chrome.cookies.getAll({domain: '115.com'}, function(cookies) {
-      for (let cookie of cookies) {
-        chrome.cookies.remove({url: 'https://115.com', name: cookie.name});
-      }
-      for (let cookie of cookieData) {
-        chrome.cookies.set({
+      let promiseArray = cookies.map(cookie => chrome.cookies.remove({url: 'https://115.com', name: cookie.name}));
+
+      Promise.all(promiseArray).then(() => {
+        let setPromiseArray = cookieData.map(cookie => chrome.cookies.set({
           url: 'https://115.com',
           name: cookie.name,
           value: cookie.value,
@@ -48,8 +51,10 @@ chrome.cookies.onChanged.addListener(function(changeInfo) {
           secure: cookie.secure,
           httpOnly: cookie.httpOnly,
           expirationDate: cookie.expirationDate
-        });
-      }
+        }));
+
+        Promise.all(setPromiseArray);
+      });
     });
   }
 });
