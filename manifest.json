@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "115 Cookie Manager",
-  "version": "1.3.5",
-  "description": "Manage cookies for the 115.com",
+  "version": "1.5.0",
+  "description": "A tool to manage cookies for 115.com with support for importing, exporting, and editing cookies",
   "permissions": ["cookies", "storage"],
   "host_permissions": [
     "https://115.com/*"
@@ -22,5 +22,9 @@
     "16": "logo.png",
     "48": "logo.png",
     "128": "logo.png"
-  }
+  },
+  "web_accessible_resources": [{
+    "resources": ["edit.html"],
+    "matches": ["<all_urls>"]
+  }]
 }
