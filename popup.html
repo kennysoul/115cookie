@@ -3,20 +3,76 @@
   <head>
     <meta charset="UTF-8">
     <style>
-      textarea {
-        width: 300px;
-        height: 200px;
+      :root {
+        color-scheme: light dark; /* 自动跟随浏览器主题 */
+      }
+      body {
+        width: 200px;
+        padding: 15px;
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      }
+      .button-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      button {
+        width: 100%;
+        padding: 10px 0;
+        border: none;
+        border-radius: 4px;
+        background-color: #0078d7;
+        color: white;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      button:hover {
+        background-color: #106ebe;
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+      .button-icon {
+        margin-right: 8px;
+        width: 16px;
+        height: 16px;
+      }
+      @media (prefers-color-scheme: dark) {
+        button {
+          background-color: #0078d7;
+        }
+        button:hover {
+          background-color: #106ebe;
+        }
       }
     </style>
   </head>
   <body>
-    <h3>Edit Cookies:</h3>
-    <textarea id="cookieInput"></textarea>
-    <br />
-    <button id="setCookies">Apply</button>
-    <button id="editCookies">Save</button>
-    <button id="exportCookies">Export</button>
-    <button id="importCookies">Import</button>
+    <div class="button-container">
+      <button id="apply">
+        <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+        </svg>
+        Apply
+      </button>
+      <button id="edit">
+        <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+        </svg>
+        Edit
+      </button>
+      <button id="export">
+        <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+        </svg>
+        Export
+      </button>
+    </div>
     <script src="popup.js"></script>
   </body>
 </html>
